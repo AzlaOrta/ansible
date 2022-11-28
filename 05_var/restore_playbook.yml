@@ -1,0 +1,37 @@
+---
+- name: webservers
+  vars:
+    pkg_web: httpd
+    pkg_web_module: mod_ssl
+    pkg_fw: firewalld
+    dir_base: /var/www/html/index.html
+    file_web_src: index.html 
+    file_web_src_file: "{{dir_base}} / {{ file_web_src }} "
+    svc_web: httpd
+    svc_fw: firewalld
+    fw_http: http
+    fw_https: https
+  tasks:
+
+- name: "패키지 삭제"
+  yum:
+      name: 
+      - "{{pkg_web}}"
+      - "{{pkg_web_module}}"
+      state: absent
+- name : "웹 소스 삭제"
+  file:
+    path: "{{file_web_src_file}}"
+    state: absent
+- name: "방화벽 서비스 해제"
+  firewalld:
+    service: "{{ item }}"
+    permanent: yes
+    state: disabled
+    immediate: yes
+    
+  loop:
+   - "{{fw_http}}"
+   - "{{fw_https}}"
+
+         

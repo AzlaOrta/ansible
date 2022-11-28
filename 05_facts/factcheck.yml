@@ -1,0 +1,23 @@
+---
+- name: "설치 및 시작 // 아파치"
+  hosts: all
+  tasks: 
+      - name: "패키지 현 상태"
+        yum:
+          name: httpd
+          state: present
+      - name: "Index.html 의 정상 여부 판단"
+        copy:
+          content: "Welcome to My server"
+          dest: /var/www/html/index.html
+      - name: "httpd 시작"
+        service:
+          name: httpd
+          state: started
+          enabled: true
+      - name: "방화벽 설정"
+        firewalld:
+          service: http
+          permanent: yes
+          immediate: yes
+          state: enabled

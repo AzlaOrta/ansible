@@ -1,0 +1,49 @@
+---
+- name: playbook job control
+  hosts: webservers
+  vars_files: vars.yml
+  tasks: 
+    # 1) Check requirement about H/W - memory => fail ~when 
+    - name: Check requirement about H/W - memory => fail ~when 
+      fail:
+        msg: "No pass H/W requirement."
+      when: min_ram_mb >  ansible_memtotal_mb
+    # 2) Install web package
+    - name: 2) Install web package
+      yum:
+        name: "{{packages}}"
+        state: present
+          
+          
+    # 3) Start/Enable web service
+    - name: 3) Start/Enable web service
+      service:
+        name: "{{web_service}}"
+        state: started
+        enabled: yes
+    # 4) Copy from host (ssl key) to control node (ssl key)
+    - name: 4) Copy from host (ssl key) to control node (ssl key)
+      block:
+        - name: Check directory -/etc/pki/tls/private
+          file:
+            path: "{{ssl_cert_dir}}"
+            state: directory
+          
+        - name: "Copy files"
+          copy:
+            src: "{{item.src}}"
+            dest: "{{item.dest}}"
+            force: yes
+
+          loop: "{{web_config_files}}"
+          notify: restart the web service
+
+
+    # -> notify ~ handler => restart the web service
+    # 5) Open the firewall service/port (https/443/tcp,http/80/tcp)
+  handlers:
+    - name: restart the web service 
+      service:
+        name: "{{ web_service }}"
+        state: restarted
+

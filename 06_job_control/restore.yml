@@ -1,0 +1,15 @@
+---
+- name: restore playbook.yml 
+  hosts: databases
+  gather_facts: no
+  vars:
+    web_package: httpd
+    db_package: mariadb-server
+  tasks:
+    - name: Remove the  packages - httpd , mariadb_server
+      yum:
+        name: "{{ item  }}"
+        state: absent
+      loop:
+        - "{{web_package}}"
+        - "{{db_package}}"

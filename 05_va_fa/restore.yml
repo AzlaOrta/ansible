@@ -1,0 +1,52 @@
+---
+  - name: 05_va_fa restore
+    hosts: web4
+    gather_facts: no
+    vars_files:
+      - varfiles/vars.yml
+
+
+    tasks:
+   # firewalld-cmd --permanent --remove-service={http,https} 
+   # firewall-cmd --reload
+    - name: Remove the port to firewall - http(80/tcp) - https(443/tcp)
+      firewalld:
+        service: "{{ item }}"
+        state: disabled
+        permanent: yes
+        immediate: yes
+      loop:
+       - "{{ fw_http }}"
+       - "{{fw_https}}"
+
+   #systemctl disable --now httpd
+    - name: Down the service - httpd.service
+      service:
+        name: "{{pkg_http}}"
+        state: stopped 
+        enabled: no
+
+
+   #rm -f /etc/httpd/secrets
+    - name: remove the directory   -/etc/httpd/secrets
+      file:
+       path: /etc/httpd/secrets
+       recurse: yes
+       state: directory
+#rm -f /var/www/html/index.html ,.htaccess
+    - name: remove the file /var/www/html/{index.html, .htaccess}
+      file:
+       path: "/var/www/html/{{item}}"
+       
+       state: absent
+      loop:
+        - "{{ src_web }}" 
+        - "{{cert_conf_httpaccess}}"
+
+   #yum remove httpd -y 
+    - name: remove packages 
+      yum:
+        name: "{{pkg_http}}"
+        state: absent
+
+  

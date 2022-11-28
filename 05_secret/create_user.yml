@@ -1,0 +1,11 @@
+---
+- name: "사용자 추가"
+  hosts: web1
+  vars_files:
+    - secret.yml
+   tasks:
+   - name:  "ansible user1 사용자 추가하기" 
+   # 2022-11-13 - 2022-11-18 ansible 자료 (unit01-04)
+     user:
+      name: "{{ username }}"
+      password: "{{ pwhash }}"
